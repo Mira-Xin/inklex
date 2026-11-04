@@ -1,0 +1,13 @@
+{
+  "name": "ECDICT",
+  "source": "https://github.com/skywind3000/ECDICT",
+  "commit": "ab22ad36302cafc6349a050e2b60894855208055",
+  "entries": 770611,
+  "shards": 512,
+  "fields": [
+    "phonetic",
+    "definition",
+    "translation"
+  ],
+  "license": "MIT"
+}
