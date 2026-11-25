@@ -1,6 +1,7 @@
+import {normalizeWorkspace,type Workspace} from './workspace';
 export type Meaning={text:string;context:string;example:string;source:string;label:string};
 export type Entry={id:string;type:string;en:string;meanings:Meaning[];category:string;themes:string[];note:string;source:string;ipa:string;collocations:string;englishExpression?:string;englishDefinitions?:string[];ipaSource?:string;status:number;links:string[];created:number;updated:number;deleted?:number};
-export type Data={entries:Entry[];themes:string[];categories?:string[]};
+export type Data={entries:Entry[];themes:string[];categories?:string[];workspace?:Workspace};
 export type Snapshot={data:Data;revision:string};
 export interface NotebookStore{
  read():Promise<Snapshot>;
@@ -20,5 +21,5 @@ export function normalizeData(value:unknown):Data{
   if(raw.deleted)entry.deleted=time(raw.deleted,now);
   return entry;
  });
- return {entries,themes:strings(input.themes),categories:strings(input.categories)};
+ return {entries,themes:strings(input.themes),categories:strings(input.categories),workspace:normalizeWorkspace(input.workspace)};
 }
