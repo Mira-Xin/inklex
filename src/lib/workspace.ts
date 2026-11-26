@@ -1,4 +1,4 @@
-export type MaterialFile={id:string;name:string;type:string;size:number};
+export type MaterialFile={id:string;name:string;type:string;size:number;storagePath?:string};
 export type Material={id:string;title:string;original:string;translation:string;reflection:string;source:string;links:string[];durationSeconds:number;cuts:number[];files:MaterialFile[];created:number;updated:number};
 export type Activity={id:string;date:string;kind:'practice'|'input'|'output';count:number;minutes:number;materialId?:string};
 export type Workspace={materials:Material[];activity:Activity[]};
@@ -14,7 +14,7 @@ export function normalizeWorkspace(value:unknown):Workspace{
  const input=value as Workspace,ids=new Set<string>();
  const materials=input.materials.map(m=>{
   if(!m||typeof m.id!=='string'||!m.id||ids.has(m.id)||typeof m.title!=='string'||!m.title.trim())throw Error('素材库中有无效或重复的材料。');ids.add(m.id);
-  return {id:m.id,title:m.title,original:text(m.original),translation:text(m.translation),reflection:text(m.reflection),source:text(m.source),links:strings(m.links),durationSeconds:nonnegative(m.durationSeconds),cuts:Array.isArray(m.cuts)?m.cuts.filter(n=>typeof n==='number'&&Number.isFinite(n)&&n>0).sort((a,b)=>a-b):[],files:Array.isArray(m.files)?m.files.filter(f=>f&&typeof f.id==='string'&&typeof f.name==='string').map(f=>({id:f.id,name:f.name,type:text(f.type),size:nonnegative(f.size)})):[],created:nonnegative(m.created),updated:nonnegative(m.updated)};
+  return {id:m.id,title:m.title,original:text(m.original),translation:text(m.translation),reflection:text(m.reflection),source:text(m.source),links:strings(m.links),durationSeconds:nonnegative(m.durationSeconds),cuts:Array.isArray(m.cuts)?m.cuts.filter(n=>typeof n==='number'&&Number.isFinite(n)&&n>0).sort((a,b)=>a-b):[],files:Array.isArray(m.files)?m.files.filter(f=>f&&typeof f.id==='string'&&typeof f.name==='string').map(f=>({id:f.id,name:f.name,type:text(f.type),size:nonnegative(f.size),...(f.storagePath?{storagePath:text(f.storagePath)}:{})})):[],created:nonnegative(m.created),updated:nonnegative(m.updated)};
  });
  const eventIds=new Set<string>();
  const activity=input.activity.map(a=>{if(!a||typeof a.id!=='string'||!a.id||eventIds.has(a.id)||!['practice','input','output'].includes(a.kind)||!/^\d{4}-\d{2}-\d{2}$/.test(a.date)||localDate(new Date(a.date+'T12:00:00'))!==a.date)throw Error('活动记录格式无效。');eventIds.add(a.id);return {id:a.id,date:a.date,kind:a.kind,count:nonnegative(a.count),minutes:nonnegative(a.minutes),...(a.materialId?{materialId:text(a.materialId)}:{})};});

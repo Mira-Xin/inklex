@@ -134,3 +134,23 @@ ECDICT：<https://github.com/skywind3000/ECDICT>，MIT License。使用版本见
 - <https://vite.dev/guide/static-deploy#github-pages>
 - <https://supabase.com/docs/guides/auth/passwords>
 - <https://supabase.com/docs/guides/database/postgres/row-level-security>
+
+## 2026-11-26：词组、句子、练习关联与云端音频
+
+已有网站升级请按本包 `UPGRADE.md` 操作。已使用上一版素材库的项目，只需额外在 Supabase SQL Editor 执行 `supabase/cloud-files.sql`，即可启用私人云端附件；文字与关联继续使用原素材库保存接口。新安装先执行 `setup.sql` 和上一版的素材库升级，再执行 `cloud-files.sql`。
+
+本次修改：
+
+- 词组与单词均可选择类别、编辑补充内容；类别可筛选，补充内容随 Excel 导入导出。
+- 句子的两个编辑字段为“译法”和“简析”，详情页显示简析；原有例句字段内容保留，句子将其显示为简析。Excel 支持“简析”列，兼容旧“例句”列。
+- 语料编辑与详情中的关联对象改为练习材料，可按材料标题或正文查找、勾选，保存后点击进入对应材料；素材库可反向关联语料。关联统一存于材料的 `links` 中，取消关联也会同步生效。旧版语料之间的关联 ID 继续保留在备份中，不会误当作材料 ID。
+- 音频与其他附件可上传到私人云端；同一账号换浏览器、换设备可直接读取。新附件上传后还需保存材料，其他设备才能获得文件引用。旧版本机附件可在原浏览器点击“上传到云端”迁移，保留材料 ID、切割点与练习记录。
+- 试听片段列表默认收起，可以展开、收起；收起时仍可使用整段播放器与切割点。
+
+私人云端附件只向当前登录账号开放，路径按用户 ID 隔离。原文件名（含中文）保存在材料记录中，对象路径使用文件 ID。每个附件最大50 MB，较大文件采用6 MB分块的 TUS 上传并显示进度，失败会提示重试。只有材料保存成功，界面才报告材料保存完成。
+
+JSON 完整备份保留材料文字、分段位置、关联关系、活动记录和云端文件引用，**不包含附件文件本体**。云端文件属于原 Supabase 项目和原账号；把 JSON 导入其他项目或账号，不会赋予其文件访问权限。移除附件引用不删除云端原文件，以便原有备份恢复。
+
+验证：`npm test` 覆盖24项测试，包括原有数据库行为、云端文件元数据保留、跨设备读取逻辑、其他账号路径拒绝、超限和失败上传、双向材料关联及私人桶访问规则。`npm run build` 包含 TypeScript 检查和生产构建。`tests/browser-qa.html` 使用虚构数据与模拟云端附件，已验证词组保存、句子简析、关联跳转、刷新恢复、旧文件迁移和片段列表折叠，不会打包进生产网站。尚未连接你的实际 Supabase 项目执行真实上传，配置后需在两台设备用同一账号作最终验收。
+
+实现依据：[存储访问控制](https://supabase.com/docs/guides/storage/security/access-control)、[断点上传](https://supabase.com/docs/guides/storage/uploads/resumable-uploads)、[上传限制](https://supabase.com/docs/guides/storage/uploads/file-limits)。
